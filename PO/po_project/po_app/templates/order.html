@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block popupwindows %}
+
+<div id="formError" class="summary popupWindow">
+    <p style="font-weight: bold; font-size: 24px;">Stan zamówienia</p>
+    <br>
+    <p style="color:red;">Formularz zamówienia nie został poprawnie uzupełniony</p>
+    <br>
+    <div style="padding: 10px;display:flex; justify-content:center; text-align: center;">
+        <button class="btn btn-danger popupButton" onclick="closeWindow('formError')">Zamknij</button>
+    </div>
+</div>
+
+{% endblock popupwindows %}
+
+{% block title %}Zamówienie{% endblock title %}
+
+{% block content %}
+
+<form action="basket" name="order" method="post">
+{% csrf_token %}
+<div class="orderWrapper">
+    <div class="tab" onclick="openTab('tabDelivery')">Dostawa</div>
+    <div class="tab" onclick="openTab('tabPay')">Płatność</div>
+    <div class="orderInnerWrapper">
+        <div id="tabDelivery" class="tabDelivery tabContent">
+            <div class="tabDeliveryContent">
+                <div class="tabDeliveryContentHeader"><p>Sposób dostawy</p></div>
+                <div class="tabDeliveryContentLeftBodyWrapperWrapper">
+                    <div class="tabDeliveryContentLeftBodyWrapper">
+                        <div class="tabDeliveryContentLeftUpperWrapper">
+                            <div class="tabDeliveryContentLeftUpperBody">
+                                <label style="color:white;">
+                                    <input name="deliveryTypeTakeaway" type="checkbox" class="deliveryCheckbox" onclick="handleDeliveryCheckbox(this)">
+                                    Odbiór
+                                </label>
+                            </div>
+                            <div style="border-right: none;" class="tabDeliveryContentLeftUpperBody">
+                                <label style="color:white;">
+                                    <input name="deliveryTypeDelivery" type="checkbox" class="deliveryCheckbox" onclick="handleDeliveryCheckbox(this)" checked>
+                                    Dostawa
+                                </label>
+                                <div class="deliveryLabelContent">
+                                    <label>Miasto</label>        
+                                    <input id="deliveryInputCity" style="color: black;" name="cityAddress" type="text" required>
+                                </div>
+                                <div class="deliveryLabelContent">
+                                    <label>Ulica</label>        
+                                    <input id="deliveryInputStreet" style="color: black;" name="streetAddress" type="text" required>
+                                </div>
+                                <div class="deliveryLabelContent">
+                                    <label>Nr mieszkania</label>        
+                                    <input id="deliveryInputHome" style="color: black;" name="homeNumber" type="text" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="border-bottom: none;" class="tabDeliveryContentLeftBodyWrapper">
+                        <div class="tabDeliveryContentLeftLower">
+                            <div class="deliveryLabelContent" style="width:40%">
+                                <label>Data</label>
+                                <input style="color:black;" type="text" id="datepicker" name="datepicker" required>  
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="border-right: none;" class="tabDeliveryContent">
+                <div class="tabDeliveryContentHeader"><p>Podsumowanie</p></div>
+                <div class="tabDeliveryContentLeftBodyWrapperWrapper">
+                    <div class="summaryOrder">
+                        <div class="summaryLabelContent">
+                            <label>Miasto</label>
+                            <input id="summaryInputCity" style="color: black;" type="text" disabled>
+                        </div>
+                        <div class="summaryLabelContent">
+                            <label>Ulica</label>
+                            <input id="summaryInputStreet" style="color: black;" type="text" disabled>
+                        </div>
+                        <div class="summaryLabelContent">
+                            <label>Nr mieszkania</label>
+                            <input id="summaryInputHome"  style="color: black;" type="text" disabled>
+                        </div>
+                        <div class="deliveryLabelContent" style="width:60%">
+                            <label>Data</label>
+                            <input id="summaryDateLabel" style="color: black;" type="text" disabled>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="tabPay" class="tabDelivery tabContent">
+            <div class="tabDeliveryContent">
+                <div class="tabDeliveryContentHeader">
+                    <p>Sposób dostawy</p>
+                    <select style="color:black;margin-left:20px;font-size:16px;" name="payment_method" onchange="handlePaymentMethod(this)">
+                        <option value="online">Online</option>
+                        <option value="offline">Stacjonarnie</option>
+                    </select>
+                </div>
+                <div id="paymentMethodDisplay" class="tabPayContentLeftBodyWrapper">
+                    <iframe src="#" width="100%" height="100%" title="Płatność"></iframe>
+                </div>
+            </div>
+            <div style="border-right: none;" class="tabDeliveryContent">
+                <div class="tabDeliveryContentHeader"><p>Podsumowanie</p></div>
+                <div class="summaryOrder">
+                    <div class="summaryLabelContentB">
+                        <label>Status transakcji</label>
+                        <input id="summaryInputStatus"  style="color: black;" name="price" type="text" disabled>
+                    </div>
+                    <div class="summaryLabelContentB">
+                        <label>Kwota</label>
+                        <input id="summaryInputPrice"  style="color: black;" name="price" type="text" value={{sum}} disabled>
+                    </div>
+                    <div class="summaryLabelContentB" style="justify-content: center;align-items: center;">
+                        <button class="btn btn-primary" onclick="submitOrder(this)">Zapłać</buttom>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+
+{% endblock content %}

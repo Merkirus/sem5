@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+{% block popupwindows %}
+
+<div id="summaryWindow" class="summary popupWindow">
+    <p style="font-weight: bold; font-size: 24px;">Podsumowanie</p>
+    <br>
+    {% if items|length != 0 %}
+    <p>Łączna kwota koszyka:</p>
+    <p>{{sum}}</p>
+    {% else %}
+    <p style="color:red;">Koszyk pusty</p>
+    {% endif %}
+    <br>
+    <div style="padding: 10px;display:flex; justify-content:center; text-align: center;">
+        <button class="btn btn-danger popupButton" onclick="closeWindow('summaryWindow')">Zamknij</button>
+    </div>
+</div>
+
+<div id="paymentError" class="summary popupWindow">
+    <p style="font-weight: bold; font-size: 24px;">Stan płatności</p>
+    <br>
+    <p style="color:red;">{{error}}</p>
+    <br>
+    <div style="padding: 10px;display:flex; justify-content:center; text-align: center;">
+        <button class="btn btn-danger popupButton" onclick="closeWindow('paymentError')">Zamknij</button>
+    </div>
+</div>
+
+{% endblock popupwindows %}
+
+{% block title %}Koszyk{% endblock title %}
+
+{% block content %}
+
+<script>
+    var isError = "{{error|safe}}"
+    console.log(isError);
+    if (isError !== "None") {
+        document.addEventListener('DOMContentLoaded', function() {
+            showWindow('paymentError');
+        });
+    }
+    // Get the current URL
+    var currentUrl = window.location.href;
+
+    // Check if the URL contains an argument
+    var hasArgument = currentUrl.includes('/basket/');
+
+    // If the URL has an argument, modify it without the argument
+    if (hasArgument) {
+        var newUrl = currentUrl.replace(/\/basket\/\d+/, '/basket/');
+        history.pushState({}, '', newUrl);
+    }
+</script>
+
+<div class="basket">
+    <div class="leftSideBasket">
+        <div class="upperLeftSideBasket">
+            <a class="btn btn-primary" href="/offert/">&laquo; Asortyment</a>
+        </div>
+        <div>
+            <form name="deleteAll" method="post">
+                <input type="hidden" id="formtype" name="formtype" value="deleteAll">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Usuń zawartość</button>
+            </form>
+        </div>
+        <div class="lowerLeftSideBasket">
+            <a class="btn btn-primary" onclick="showWindow('summaryWindow')">Podsumowanie</a>
+            <a class="btn btn-primary" {% if sum != 0.0 %}href="/order/"{% else %}disabled{% endif %} >Złóż zamówienie</a>
+        </div>
+    </div>
+
+    <div class="rightSideBasket">
+        <div class="itemList">
+            {% for item in items %}
+            <div class="item">
+                <div class="itemHelper">
+                    <img style="width:100px; height:100px;" src="{% static 'flowers/'|add:item.item.name|add:'.png' %}">
+                    <p style="padding-left: 10px;">{{item.item.name}}</p>
+                </div>
+                <div class="itemHelper" style="justify-content:center;">
+                    <p>Cena: {{item.item.price}}</p>
+                    <p style="padding-left: 10px;">Ilość: {{item.number}}</p>
+                </div>
+                <div class="itemHelper" style="justify-content:right;">
+                    <form name="{{item.item.id}}" method="post">
+                        <input type="hidden" id="formtype" name="formtype" value="delete">
+                        {% csrf_token %}
+                        <input type="hidden" id="item_id" name="item_id" value="{{item.id}}">
+                        <button type="submit" class="btn btn-danger">-</button>
+                    </form>
+                    <form name="{{item.item.id}}" method="post">
+                        <input type="hidden" id="formtype" name="formtype" value="add">
+                        {% csrf_token %}
+                        <input type="hidden" id="item_id" name="item_id" value="{{item.id}}">
+                        <button type="submit" style="margin-left: 10px;" class="btn btn-primary">+</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

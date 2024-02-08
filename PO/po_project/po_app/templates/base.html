@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        {% load static %}
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+        <title>Kwiaciarnia</title>
+    </head>
+    <body>
+        <header>
+            <div class="header_left">
+                <a class="btn btn-primary" style="margin-right:20px;" href="/offert/">Strona główna</a>
+                <a class="btn btn-primary" style="margin-right:20px;" href="/offert/">Wyświetl asortyment</a>
+                <a class="btn btn-primary" href="/offert/">Dane kontaktowe</a>
+            </div>
+            <div class="header_center">
+                <a class="btn btn-primary" href="/basket/">Koszyk</a>
+            </div>
+            <div class="header_right">
+                <a class="btn btn-primary" href="/basket/">Moje konto</a>
+            </div>
+        </header>
+        <div id="windowBackground" class="windowBackground">
+            {% block popupwindows %}{% endblock popupwindows %}
+        </div>
+        {% block content %}{% endblock content %}
+    </body>
+</html>
+
+<script>
+    function showWindow(windowId) {
+        document.getElementById("windowBackground").style.display = "block";
+        document.getElementById(windowId).style.display = "flex";
+    }
+    function closeWindow(windowId) {
+        document.getElementById("windowBackground").style.display = "none";
+        document.getElementById(windowId).style.display = "flex";
+    }
+    function openTab(tabName) {
+        var tabContent;
+        tabContent = document.getElementsByClassName("tabContent");
+        for (var i = 0; i < tabContent.length; i++) {
+            tabContent[i].style.display = "none";
+        }
+        document.getElementById(tabName).style.display = "block";
+    }
+    function handleDeliveryCheckbox(clickedCheckbox) {
+        var deselectCheckboxes = document.querySelectorAll('.deliveryCheckbox');
+        deselectCheckboxes.forEach(function (checkbox) {
+            if (checkbox !== clickedCheckbox) {
+                checkbox.checked = false;
+            }
+        });
+        if (clickedCheckbox.name == "deliveryTypeDelivery" && clickedCheckbox.checked) {
+            var hiddenContent = document.getElementsByClassName("summaryLabelContent");
+            for (var i = 0; i < hiddenContent.length; i++) {
+                hiddenContent[i].style.display = "flex";
+            }
+            document.getElementById("deliveryInputCity").required = true;
+            document.getElementById("deliveryInputStreet").required = true;
+            document.getElementById("deliveryInputHome").required = true;
+        }
+        if (clickedCheckbox.name == "deliveryTypeTakeaway" && clickedCheckbox.checked) {
+            var hiddenContent = document.getElementsByClassName("summaryLabelContent");
+            for (var i = 0; i < hiddenContent.length; i++) {
+                hiddenContent[i].style.display = "none";
+            }
+            document.getElementById("deliveryInputCity").required = false;
+            document.getElementById("deliveryInputStreet").required = false;
+            document.getElementById("deliveryInputHome").required = false;
+        }
+    }
+    function handlePaymentMethod(chosenPaymentMethod) {
+        var paymentDisplay = document.getElementById("paymentMethodDisplay");
+        var selectedValue = chosenPaymentMethod.value;
+
+        console.log(selectedValue);
+
+        if (selectedValue === "offline") {
+            paymentDisplay.style.display = "none";
+        }
+        if (selectedValue == "online") {
+            paymentDisplay.style.display = "flex";
+        }
+    }
+    function submitOrder(orderButton) {
+        var requiredFields = document.querySelectorAll('input[required]');
+
+        var isFilled = Array.from(requiredFields).every(function(field) {
+            return field.value.trim() !== '';
+        });
+
+        if (!isFilled) {
+            showWindow("formError");
+        } else {
+            orderButton.closest('form').submit();
+        }
+    }
+    $(document).ready(function(){
+        $("#datepicker").datepicker({
+            showOn: 'focus',
+            minDate: 0,
+            dateFormat: 'dd-mm-yy',
+            onSelect: function(dateText) {
+                $("#summaryDateLabel").val(dateText);
+            }
+        });
+        $("#deliveryInputCity").bind('keydown keyup keypress', function() {
+            $("#summaryInputCity").val(this.value || "");
+        });
+        $("#deliveryInputStreet").bind('keydown keyup keypress', function() {
+            $("#summaryInputStreet").val(this.value || "");
+        });
+        $("#deliveryInputHome").bind('keydown keyup keypress', function() {
+            $("#summaryInputHome").val(this.value || "");
+        });
+    });
+</script>
